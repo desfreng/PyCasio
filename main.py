@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 13 18:21:49 2019
-
-@author: gabriel
-"""
 import ctypes
 import time
 

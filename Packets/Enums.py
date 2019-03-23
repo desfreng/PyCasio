@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Mar 17 22:21:50 2019
-
-@author: gabriel
-"""
-
 from enum import Enum
 
 
