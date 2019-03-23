@@ -12,152 +12,146 @@ class PacketType(Enum):
     Error = 0x15
     Terminate = 0x18
 
-    Unknown = 0x0
-
-
-class UnknownPacketType(Enum):
-    Unknown = b"00"
-
 
 class CommandPacketType:
     class System(Enum):
-        Reset = b"00"
-        GetInfo = b"01"
-        SetLinkSettings = b"03"
+        Reset = "00"
+        GetInfo = "01"
+        SetLinkSettings = "03"
 
     class MCSStorage(Enum):
-        CreateDirectory = b"20"
-        DeleteDirectory = b"21"
-        RenameDirectory = b"22"
-        ChangeWorkingDirectory = b"23"
+        CreateDirectory = "20"
+        DeleteDirectory = "21"
+        RenameDirectory = "22"
+        ChangeWorkingDirectory = "23"
 
-        FileTransferRequest = b"24"
-        FileTransferAllRequest = b"29"
-        FileTransfer = b"25"
+        FileTransferRequest = "24"
+        FileTransferAllRequest = "29"
+        FileTransfer = "25"
 
-        DeleteFile = b"26"
-        RenameFile = b"27"
-        CopyFile = b"28"
+        DeleteFile = "26"
+        RenameFile = "27"
+        CopyFile = "28"
 
-        CapacityTransmitRequest = b"2B"
-        CapacityTransmit = b"2C"
+        CapacityTransmitRequest = "2"
+        CapacityTransmit = "2C"
 
-        FileInfoTransferAllRequest = b"2D"
-        FileInfoTransfer = b"2E"
+        FileInfoTransferAllRequest = "2D"
+        FileInfoTransfer = "2E"
 
-        RAMImageTransferRequest = b"2F"
-        RAMImageTransfer = b"30"
+        RAMImageTransferRequest = "2F"
+        RAMImageTransfer = "30"
 
-        SetupEntryTransferRequest = b"31"
-        SetupEntryTransfer = b"32"
-        SetupEntryTransferAllRequest = b"33"
+        SetupEntryTransferRequest = "31"
+        SetupEntryTransfer = "32"
+        SetupEntryTransferAllRequest = "33"
 
     class FlashStorage(Enum):
-        CreateDirectory = b"40"
-        DeleteDirectory = b"41"
-        RenameDirectory = b"42"
-        ChangeWorkingDirectory = b"43"
+        CreateDirectory = "40"
+        DeleteDirectory = "41"
+        RenameDirectory = "42"
+        ChangeWorkingDirectory = "43"
 
-        FileTransferRequest = b"44"
-        FileTransfer = b"45"
-        FileTransferAllRequest = b"49"
+        FileTransferRequest = "44"
+        FileTransfer = "45"
+        FileTransferAllRequest = "49"
 
-        DeleteFile = b"46"
-        RenameFile = b"47"
-        CopyFile = b"48"
+        DeleteFile = "46"
+        RenameFile = "47"
+        CopyFile = "48"
 
-        CapacityTransmitRequest = b"4B"
-        CapacityTransmit = b"4C"
+        CapacityTransmitRequest = "4"
+        CapacityTransmit = "4C"
 
-        FileInfoTransferAllRequest = b"4D"
-        FileInfoTransfer = b"4E"
+        FileInfoTransferAllRequest = "4D"
+        FileInfoTransfer = "4E"
 
-        FlashImageTransferRequest = b"4F"
-        FlashImageTransfer = b"50"
+        FlashImageTransferRequest = "4F"
+        FlashImageTransfer = "50"
 
-        OptimizeFiseSystem = b"51"
+        OptimizeFileSystem = "51"
 
 
 class DataPacketType:
     class MCSStorage(Enum):
-        CreateDirectory = b"20"
-        DeleteDirectory = b"21"
-        RenameDirectory = b"22"
-        ChangeWorkingDirectory = b"23"
+        CreateDirectory = CommandPacketType.MCSStorage.CreateDirectory
+        DeleteDirectory = CommandPacketType.MCSStorage.DeleteDirectory
+        RenameDirectory = CommandPacketType.MCSStorage.RenameDirectory
+        ChangeWorkingDirectory = CommandPacketType.MCSStorage.ChangeWorkingDirectory
 
-        FileTransferRequest = b"24"
-        FileTransferAllRequest = b"29"
-        FileTransfer = b"25"
+        FileTransferRequest = CommandPacketType.MCSStorage.FileTransferRequest
+        FileTransferAllRequest = CommandPacketType.MCSStorage.FileTransferAllRequest
+        FileTransfer = CommandPacketType.MCSStorage.FileTransfer
 
-        DeleteFile = b"26"
-        RenameFile = b"27"
-        CopyFile = b"28"
+        DeleteFile = CommandPacketType.MCSStorage.DeleteFile
+        RenameFile = CommandPacketType.MCSStorage.RenameFile
+        CopyFile = CommandPacketType.MCSStorage.CopyFile
 
-        CapacityTransmitRequest = b"2B"
-        CapacityTransmit = b"2C"
+        CapacityTransmitRequest = CommandPacketType.MCSStorage.CapacityTransmitRequest
+        CapacityTransmit = CommandPacketType.MCSStorage.CapacityTransmit
 
-        FileInfoTransferAllRequest = b"2D"
-        FileInfoTransfer = b"2E"
+        FileInfoTransferAllRequest = CommandPacketType.MCSStorage.FileInfoTransferAllRequest
+        FileInfoTransfer = CommandPacketType.MCSStorage.FileInfoTransfer
 
-        RAMImageTransferRequest = b"2F"
-        RAMImageTransfer = b"30"
+        RAMImageTransferRequest = CommandPacketType.MCSStorage.RAMImageTransferRequest
+        RAMImageTransfer = CommandPacketType.MCSStorage.RAMImageTransfer
 
-        SetupEntryTransferRequest = b"31"
-        SetupEntryTransfer = b"32"
-        SetupEntryTransferAllRequest = b"33"
+        SetupEntryTransferRequest = CommandPacketType.MCSStorage.SetupEntryTransferRequest
+        SetupEntryTransfer = CommandPacketType.MCSStorage.SetupEntryTransfer
+        SetupEntryTransferAllRequest = CommandPacketType.MCSStorage.SetupEntryTransferAllRequest
 
     class FlashStorage(Enum):
-        CreateDirectory = b"40"
-        DeleteDirectory = b"41"
-        RenameDirectory = b"42"
-        ChangeWorkingDirectory = b"43"
+        CreateDirectory = CommandPacketType.FlashStorage.CreateDirectory
+        DeleteDirectory = CommandPacketType.FlashStorage.DeleteDirectory
+        RenameDirectory = CommandPacketType.FlashStorage.RenameDirectory
+        ChangeWorkingDirectory = CommandPacketType.FlashStorage.ChangeWorkingDirectory
 
-        FileTransferRequest = b"44"
-        FileTransfer = b"45"
-        FileTransferAllRequest = b"49"
+        FileTransferRequest = CommandPacketType.FlashStorage.FileTransferRequest
+        FileTransferAllRequest = CommandPacketType.FlashStorage.FileTransferAllRequest
+        FileTransfer = CommandPacketType.FlashStorage.FileTransfer
 
-        DeleteFile = b"46"
-        RenameFile = b"47"
-        CopyFile = b"48"
+        DeleteFile = CommandPacketType.FlashStorage.DeleteFile
+        RenameFile = CommandPacketType.FlashStorage.RenameFile
+        CopyFile = CommandPacketType.FlashStorage.CopyFile
 
-        CapacityTransmitRequest = b"4B"
-        CapacityTransmit = b"4C"
+        CapacityTransmitRequest = CommandPacketType.FlashStorage.CapacityTransmitRequest
+        CapacityTransmit = CommandPacketType.FlashStorage.CapacityTransmit
 
-        FileInfoTransferAllRequest = b"4D"
-        FileInfoTransfer = b"4E"
+        FileInfoTransferAllRequest = CommandPacketType.FlashStorage.FileInfoTransferAllRequest
+        FileInfoTransfer = CommandPacketType.FlashStorage.FileInfoTransfer
 
-        FlashImageTransferRequest = b"4F"
-        FlashImageTransfer = b"50"
+        FlashImageTransferRequest = CommandPacketType.FlashStorage.FlashImageTransferRequest
+        FlashImageTransfer = CommandPacketType.FlashStorage.FlashImageTransfer
 
-        OptimizeFiseSystem = b"51"
+        OptimizeFileSystem = CommandPacketType.FlashStorage.OptimizeFileSystem
 
 
 class RoleswapPacketType(Enum):
-    Default = b"00"
+    Default = "00"
 
 
 class CheckPacketType(Enum):
-    InitConnection = b"00"
-    CheckConnection = b"01"
+    InitConnection = "00"
+    CheckConnection = "01"
 
 
 class AckPacketType(Enum):
-    Default = b"00"
-    YesOverwriteReply = b"01"
-    ExtendedAck = b"03"
+    Default = "00"
+    YesOverwriteReply = "01"
+    ExtendedAck = "03"
 
 
 class ErrorPacketType(Enum):
-    Default = b"00"
-    ResendRequest = b"01"
-    Overwrite = b"02"
-    NoOverwriteReply = b"03"
-    OverwriteImpossible = b"04"
-    MemoryFull = b"05"
+    Default = "00"
+    ResendRequest = "01"
+    Overwrite = "02"
+    NoOverwriteReply = "03"
+    OverwriteImpossible = "04"
+    MemoryFull = "05"
 
 
 class TerminatePacketType(Enum):
-    Default = b"00"
-    UserRequest = b"01"
-    Timeout = b"02"
-    Overwrite = b"03"
+    Default = "00"
+    UserRequest = "01"
+    Timeout = "02"
+    Overwrite = "03"
