@@ -1,40 +1,42 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from ctypes import c_ubyte
-
-_HEXADECIMAL_ARRAY = bytearray("0123456789ABCDEF", "ascii")
-
-_HEXADECIMAL_VALUE = {48: 0, 49: 1, 50: 2, 51: 3, 52: 4, 53: 5, 54: 6, 55: 7,
-                      56: 8, 57: 9, 65: 10, 66: 11, 67: 12, 68: 13, 69: 14,
-                      70: 15}
 
 
-def to_hexadecimal(number: int, field_size: int = 2) -> bytearray:
-    output_array = bytearray()
+class Private:
+    _HEXADECIMAL_ARRAY = bytearray("0123456789ABCDEF", "ascii")
 
-    while number != 0:
-        output_array.insert(0, _HEXADECIMAL_ARRAY[number % 16])
-        number //= 16
+    @staticmethod
+    def to_hexadecimal(number: int, field_size: int = 2) -> bytearray:
+        output_array = bytearray()
 
-    while len(output_array) < field_size:
-        output_array.insert(0, _HEXADECIMAL_ARRAY[0])
+        while number != 0:
+            output_array.insert(0, Private._HEXADECIMAL_ARRAY[number % 16])
+            number //= 16
 
-    return output_array
+        while len(output_array) < field_size:
+            output_array.insert(0, Private._HEXADECIMAL_ARRAY[0])
 
+        return output_array
 
-def to_integer(number: bytearray) -> int:
-    output_number = 0
-    number_index = len(number)
+    @staticmethod
+    def to_integer(number: bytearray) -> int:
+        output_number = 0
+        number_index = len(number)
 
-    for part in number:
-        number_index -= 1
-        output_number += _HEXADECIMAL_VALUE[part] * 16 ** number_index
-
-    return output_number
+        for part in number:
+            number_index -= 1
+            # Séparation entre les lettres et les chiffres du code Hex
+            if part > Private._HEXADECIMAL_ARRAY[9]:
+                # Les lettres A-F sont codés en uint8 entre 65 et 70
+                output_number += (part - Private._HEXADECIMAL_ARRAY[10] + 10) * 16 ** number_index
+            else:
+                # Les chiffres 0-9 sont codés en uint8 entre 48 et 57
+                output_number += (part - Private._HEXADECIMAL_ARRAY[0]) * 16 ** number_index
+        return output_number
 
 
 class BasePacket:
-    def __init__(self):
+    def _init__(self):
         self._type = 0x0
         self._sub_type = "00"
         self._is_extended = False
@@ -45,12 +47,14 @@ class BasePacket:
     def compute_checksum(self):
         self._update_buffer()
 
-        checksum = c_ubyte(0)
+        checksum = 0
         for i in self._buffer[1:]:
-            checksum.value += i
+            checksum += i
 
-        checksum.value = ~checksum.value + 1
-        self._data += to_hexadecimal(checksum.value)
+        checksum = ~checksum + 1
+        checksum %= 256
+
+        self._data += Private.to_hexadecimal(checksum)
 
     def _update_buffer(self):
         self._buffer.clear()
@@ -61,7 +65,7 @@ class BasePacket:
 
         if self._is_extended:
             self._buffer += b"1"
-            self._buffer += to_hexadecimal(len(self._data), 4)
+            self._buffer += Private.to_hexadecimal(len(self._data), 4)
             self._buffer += self._data
         else:
             self._buffer += b"0"
@@ -69,6 +73,6 @@ class BasePacket:
     def is_ready_to_send(self) -> bool:
         if self._is_extended:
             # TODO : Check This
-            return len(self._data) == 6 + to_integer(self._data[4:8])
+            return len(self._data) == 6 + Private.to_integer(self._data[4:8])
         else:
             return len(self._data) == 6
