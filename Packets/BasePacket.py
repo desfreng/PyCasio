@@ -86,11 +86,13 @@ class BasePacket:
 
         self._buffer += Private.to_hexadecimal(checksum)
 
-    def is_ready_to_send(self) -> bool:
+    def is_ready(self) -> bool:
         if self.extended:
-            return len(self._buffer) == 10 + Private.to_integer(self._buffer[4:8])
+            return len(self._buffer) == 10 + Private.to_integer(self._buffer[4:8]) and \
+                   self._type is not Enums.PacketType.Unknown
         else:
-            return len(self._buffer) == 6
+            return len(self._buffer) == 6 and \
+                   self._type is not Enums.PacketType.Unknown
 
     def __repr__(self):
         self.compute_checksum()
