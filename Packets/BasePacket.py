@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from Utils import *
 
 
 class BasePacket(ABC):
-    def __init__(self):
-        self._type = PacketType.Unknown
-        self._sub_type = PacketSubType.Unknown
-        self._data = bytearray()
+    def __init__(self, packet_type=PacketType.Unknown, packet_subtype=PacketSubType.Unknown, packet_data=bytearray()):
+        if not isinstance(packet_type, PacketType):
+            raise TypeError
+        if not isinstance(packet_subtype, SubTypes):
+            raise TypeError
+        if not isinstance(packet_data, (bytearray, bytes)):
+            raise TypeError
+
+        self._type = packet_type
+        self._sub_type = packet_subtype
+        self._data = bytearray(packet_data)
         self._buffer = bytearray()
-        self._checksum = 00
+        self._checksum = 0
         self._can_be_send = True
 
     @property
@@ -78,8 +85,8 @@ class BasePacket(ABC):
         self._buffer += to_hexadecimal(checksum)
 
     @classmethod
-    @abstractmethod
-    def from_data(cls, data):
+    # @abstractmethod
+    def from_data(cls, packet_subtype, packet_data):
         pass
 
     def __repr__(self):

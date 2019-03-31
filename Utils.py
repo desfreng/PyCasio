@@ -47,15 +47,15 @@ class PacketType(Enum):  # [0 - 24]
     Terminate = 0x18  # Value : 24
 
 
-class _SubType:
+class SubTypes:
     pass
 
 
-class PacketSubType(_SubType, Enum):
+class PacketSubType(SubTypes, Enum):
     Unknown = b"FF"
 
 
-class CommandSubType(_SubType, Enum):
+class CommandSubType(SubTypes, Enum):
     # Commands & Data Types
 
     # System                   # [0 - 2]
@@ -119,25 +119,25 @@ class CommandSubType(_SubType, Enum):
 DataSubType = CommandSubType
 
 
-class RoleswapSubType(_SubType, Enum):
+class RoleswapSubType(SubTypes, Enum):
     # Roleswap Types              # [0]
     Default = b"00"  # Value : 0
 
 
-class CheckSubType(_SubType, Enum):
+class CheckSubType(SubTypes, Enum):
     # Check Types              # [0 - 1]
     InitConnection = b"00"  # Value : 0
     CheckConnection = b"01"  # Value : 1
 
 
-class AckSubType(_SubType, Enum):
+class AckSubType(SubTypes, Enum):
     # Ack Types                # [0 - 2]
     Default = b"00"  # Value : 0
     YesOverwriteReply = b"01"  # Value : 1
     ExtendedAck = b"02"  # Value : 2
 
 
-class ErrorSubType(_SubType, Enum):
+class ErrorSubType(SubTypes, Enum):
     # Error Types              # [0 - 5]
     Default = b"00"  # Value : 0
     ResendRequest = b"01"  # Value : 1
@@ -147,7 +147,7 @@ class ErrorSubType(_SubType, Enum):
     MemoryFull = b"05"  # Value : 5
 
 
-class TerminateSubType(_SubType, Enum):
+class TerminateSubType(SubTypes, Enum):
     # Terminates Types         # [0 - 3]
     Default = b"00"  # Value : 0
     UserRequest = b"01"  # Value : 1
