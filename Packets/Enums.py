@@ -15,30 +15,15 @@ class PacketType(Enum):  # [0 - 24]
     Terminate = 0x18  # Value : 24
 
 
-class PacketSubType(Enum):
-    # Default (Roleswap, Ack, Error, Terminate)
-    Default = b"00"  # Value : 0
+class _SubType:
+    pass
 
-    # Check Types              # [0 - 1]
-    InitConnection = b"00"  # Value : 0
-    CheckConnection = b"01"  # Value : 1
 
-    # Ack Types                # [0 - 2]
-    YesOverwriteReply = b"01"  # Value : 1
-    ExtendedAck = b"02"  # Value : 2
+class PacketSubType(_SubType, Enum):
+    Unknown = b"FF"
 
-    # Error Types              # [0 - 5]
-    ResendRequest = b"01"  # Value : 1
-    OverwriteError = b"02"  # Value : 2
-    NoOverwriteReply = b"03"  # Value : 3
-    OverwriteImpossible = b"04"  # Value : 4
-    MemoryFull = b"05"  # Value : 5
 
-    # Terminates Types         # [0 - 3]
-    UserRequest = b"01"  # Value : 1
-    Timeout = b"02"  # Value : 2
-    Overwrite = b"03"  # Value : 3
-
+class CommandSubType(_SubType, Enum):
     # Commands & Data Types
 
     # System                   # [0 - 2]
@@ -90,10 +75,49 @@ class PacketSubType(Enum):
     FlashCapacityTransmitRequest = b"4B"  # Value : 75
     FlashCapacityTransmit = b"4C"  # Value : 76
 
-    FlashFileInfoTransferAllRequest = b"4D"  # Value : 77
     FlashFileInfoTransfer = b"4E"  # Value : 78
+    FlashFileInfoTransferAllRequest = b"4D"  # Value : 77
 
     FlashImageTransferRequest = b"4F"  # Value : 79
     FlashImageTransfer = b"50"  # Value : 80
 
     OptimizeFileSystem = b"51"  # Value : 81
+
+
+DataSubType = CommandSubType
+
+
+class RoleswapSubType(_SubType, Enum):
+    # Roleswap Types              # [0]
+    Default = b"00"  # Value : 0
+
+
+class CheckSubType(_SubType, Enum):
+    # Check Types              # [0 - 1]
+    InitConnection = b"00"  # Value : 0
+    CheckConnection = b"01"  # Value : 1
+
+
+class AckSubType(_SubType, Enum):
+    # Ack Types                # [0 - 2]
+    Default = b"00"  # Value : 0
+    YesOverwriteReply = b"01"  # Value : 1
+    ExtendedAck = b"02"  # Value : 2
+
+
+class ErrorSubType(_SubType, Enum):
+    # Error Types              # [0 - 5]
+    Default = b"00"  # Value : 0
+    ResendRequest = b"01"  # Value : 1
+    OverwriteError = b"02"  # Value : 2
+    NoOverwriteReply = b"03"  # Value : 3
+    OverwriteImpossible = b"04"  # Value : 4
+    MemoryFull = b"05"  # Value : 5
+
+
+class TerminateSubType(_SubType, Enum):
+    # Terminates Types         # [0 - 3]
+    Default = b"00"  # Value : 0
+    UserRequest = b"01"  # Value : 1
+    Timeout = b"02"  # Value : 2
+    Overwrite = b"03"  # Value : 3

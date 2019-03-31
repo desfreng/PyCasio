@@ -1,78 +1,99 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from Packets.BasePacket import BasePacket, Private
-from Packets.Enums import PacketType, PacketSubType
+from Packets.AckPacket import AckPacket
+from Packets.CheckPacket import CheckPacket
+from Packets.CommandPacket import CommandPacket
+from Packets.DataPacket import DataPacket
+from Packets.Enums import PacketType
+from Packets.ErrorPacket import ErrorPacket
+from Packets.RoleswapPacket import RoleswapPacket
+from Packets.TerminatePacket import TerminatePacket
+from Utils import *
 
 
-class ReceivedPacket(BasePacket):
+class ReceivedPacket:
     def __init__(self):
-        super().__init__()
-        self._corrupt = False
+        self._type = PacketType.Unknown
+        self._bytes_received = bytes()
+
+    @property
+    def packet_type(self) -> PacketType:
+        return self._type
+
+    @property
+    def corrupt(self) -> bool:
+        return self.corrupt_data(self._bytes_received)
+
+    @property
+    def received_data(self) -> bytes:
+        return bytes(self._bytes_received)
+
+    @staticmethod
+    def corrupt_data(data: bytes) -> bool:
+        if not isinstance(data, bytes):
+            raise TypeError
+
+        new_checksum = 0
+        old_checksum = to_integer(data[-2:])
+
+        for i in data[1:-2]:
+            new_checksum += i
+
+        new_checksum = ~new_checksum + 1
+        new_checksum %= 256
+
+        return new_checksum != old_checksum
 
     def from_bytes(self, array: bytes):
         if not isinstance(array, bytes):
             raise TypeError
 
+        self._bytes_received = array
+
         for p_type in PacketType:
             if p_type.value == array[0]:
-                self._set_type(p_type)
+                self._type = p_type
                 break
 
-        if self.packet_type is PacketType.Ack:
-            if array[1:2] == PacketSubType.Default:
-                self._set_subtype(PacketSubType.Default)
-            elif array[1:2] == PacketSubType.YesOverwriteReply:
-                self._set_subtype(PacketSubType.YesOverwriteReply)
-            elif array[1:2] == PacketSubType.ExtendedAck:
-                self._set_subtype(PacketSubType.ExtendedAck)
+    def __repr__(self) -> str:
+        return "[BasePacket] Type : {:#02x}, Bytes : {}, Checksum : {}, Corrupt : {}".format(
+            self.packet_type, self.received_data, self.received_data[-2:].decode("ascii"),
+            self.corrupt)
 
-        elif self.packet_type is PacketType.Check:
-            if array[1:2] == PacketSubType.InitConnection:
-                self._set_subtype(PacketSubType.InitConnection)
-            elif array[1:2] == PacketSubType.CheckConnection:
-                self._set_subtype(PacketSubType.CheckConnection)
+    def __bytes__(self) -> bytes:
+        return self.received_data
 
-        elif self.packet_type is PacketType.Roleswap:
-            self._set_subtype(PacketSubType.Default)
+    def command_packet(self) -> CommandPacket:
+        packet = CommandPacket.from_data(self.received_data)
+        packet.disable_send()
+        return packet
 
-        elif self.packet_type is PacketType.Error:
-            if array[1:2] == PacketSubType.Default:
-                self._set_subtype(PacketSubType.Default)
-            elif array[1:2] == PacketSubType.ResendRequest:
-                self._set_subtype(PacketSubType.ResendRequest)
-            elif array[1:2] == PacketSubType.OverwriteError:
-                self._set_subtype(PacketSubType.OverwriteError)
-            elif array[1:2] == PacketSubType.NoOverwriteReply:
-                self._set_subtype(PacketSubType.NoOverwriteReply)
-            elif array[1:2] == PacketSubType.OverwriteImpossible:
-                self._set_subtype(PacketSubType.OverwriteImpossible)
-            elif array[1:2] == PacketSubType.MemoryFull:
-                self._set_subtype(PacketSubType.MemoryFull)
+    def data_packet(self) -> DataPacket:
+        packet = DataPacket.from_data(self.received_data)
+        packet.disable_send()
+        return packet
 
-        elif self.packet_type is PacketType.Terminate:
-            if array[1:2] == PacketSubType.Default:
-                self._set_subtype(PacketSubType.Default)
-            elif array[1:2] == PacketSubType.UserRequest:
-                self._set_subtype(PacketSubType.UserRequest)
-            elif array[1:2] == PacketSubType.Timeout:
-                self._set_subtype(PacketSubType.Timeout)
-            elif array[1:2] == PacketSubType.Overwrite:
-                self._set_subtype(PacketSubType.Overwrite)
+    def roleswap_packet(self) -> RoleswapPacket:
+        packet = RoleswapPacket.from_data(self.received_data)
+        packet.disable_send()
+        return packet
 
-        elif self.packet_type is PacketType.Command or self.packet_type is PacketType.Data:
-            if array[1:2] == PacketSubType.Reset:
-                self._set_subtype(PacketSubType.Reset)
-            elif array[1:2] == PacketSubType.GetInfo:
-                self._set_subtype(PacketSubType.GetInfo)
-            elif array[1:2] == PacketSubType.SetLinkSettings:
-                self._set_subtype(PacketSubType.SetLinkSettings)
-            else:
-                for p_sub_type in PacketSubType:
-                    if Private.to_integer(p_sub_type) in range(0, 32):
-                        break
-                    if p_sub_type.value == array[1:2]:
-                        self._set_subtype(p_sub_type)
-                        break
+    def check_packet(self) -> CheckPacket:
+        packet = CheckPacket.from_data(self.received_data)
+        packet.disable_send()
+        return packet
 
-        # if array[3] is b"1":
-        # self._data.
+    def ack_packet(self) -> AckPacket:
+        packet = AckPacket.from_data(self.received_data)
+        packet.disable_send()
+        return packet
+
+    def error_packet(self) -> ErrorPacket:
+        packet = ErrorPacket.from_data(self.received_data)
+        packet.disable_send()
+        return packet
+
+    def terminate_packet(self) -> TerminatePacket:
+        packet = TerminatePacket.from_data(self.received_data)
+        packet.disable_send()
+        return packet

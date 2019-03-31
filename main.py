@@ -84,3 +84,4 @@ with usb1.USBContext() as context:
     except KeyboardInterrupt:
         print("Quit Application")
         calculatrice.bulkWrite(0x01, make_packet(0x18, bytearray("000", "ascii")))
+
