@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
 
-from Packets import Enums
 from Utils import *
 
 
 class BasePacket(ABC):
     def __init__(self):
-        self._type = Enums.PacketType.Unknown
-        self._sub_type = Enums.PacketSubType.Unknown
+        self._type = PacketType.Unknown
+        self._sub_type = PacketSubType.Unknown
         self._data = bytearray()
         self._buffer = bytearray()
         self._checksum = 00
@@ -20,11 +19,11 @@ class BasePacket(ABC):
         return len(self._data) != 0
 
     @property
-    def packet_type(self) -> Enums.PacketType:
+    def packet_type(self) -> PacketType:
         return self._type
 
     @property
-    def packet_subtype(self) -> Enums.PacketSubType:
+    def packet_subtype(self) -> PacketSubType:
         return self._sub_type
 
     @property
@@ -40,10 +39,10 @@ class BasePacket(ABC):
     def valid(self) -> bool:
         if self.extended:
             return len(self._buffer) == 10 + to_integer(self._buffer[4:8]) and \
-                   self._type is not Enums.PacketType.Unknown
+                   self._type is not PacketType.Unknown
         else:
             return len(self._buffer) == 6 and \
-                   self._type is not Enums.PacketType.Unknown
+                   self._type is not PacketType.Unknown
 
     @property
     def ready(self) -> bool:

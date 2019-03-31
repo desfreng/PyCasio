@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from Packets import BasePacket
+from Packets.BasePacket import BasePacket
 
 
 class ErrorPacket(BasePacket):

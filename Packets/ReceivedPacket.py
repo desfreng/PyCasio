@@ -4,7 +4,6 @@ from Packets.AckPacket import AckPacket
 from Packets.CheckPacket import CheckPacket
 from Packets.CommandPacket import CommandPacket
 from Packets.DataPacket import DataPacket
-from Packets.Enums import PacketType
 from Packets.ErrorPacket import ErrorPacket
 from Packets.RoleswapPacket import RoleswapPacket
 from Packets.TerminatePacket import TerminatePacket
@@ -57,7 +56,7 @@ class ReceivedPacket:
 
     def __repr__(self) -> str:
         return "[BasePacket] Type : {:#02x}, Bytes : {}, Checksum : {}, Corrupt : {}".format(
-            self.packet_type, self.received_data, self.received_data[-2:].decode("ascii"),
+            self.packet_type.value, self.received_data, self.received_data[-2:].decode("ascii"),
             self.corrupt)
 
     def __bytes__(self) -> bytes:
