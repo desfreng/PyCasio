@@ -20,16 +20,22 @@ class ReceivedPacket:
         return self._type
 
     @property
+    def packet_subtype(self) -> bytes:
+        return self._bytes_received[1:3]
+
+    @property
+    def packet_data_received(self) -> bytes:
+        if self._bytes_received[3:4] == b"1":
+            return bytes(self._bytes_received[8:8 + to_integer(self._bytes_received[4:8])])
+        return bytes()
+
+    @property
     def corrupt(self) -> bool:
         return self.corrupt_data(self._bytes_received)
 
-    @property
-    def received_data(self) -> bytes:
-        return bytes(self._bytes_received)
-
     @staticmethod
     def corrupt_data(data: bytes) -> bool:
-        if not isinstance(data, bytes):
+        if not isinstance(data, (bytes, bytearray)):
             raise TypeError
 
         new_checksum = 0
@@ -44,10 +50,14 @@ class ReceivedPacket:
         return new_checksum != old_checksum
 
     def from_bytes(self, array: bytes):
-        if not isinstance(array, bytes):
+        if not isinstance(array, (bytes, bytearray)):
             raise TypeError
 
         self._bytes_received = array
+
+        if self.corrupt_data(self._bytes_received):
+            self._bytes_received = None
+            raise BaseException("Corrupt Data !")
 
         for p_type in PacketType:
             if p_type.value == array[0]:
@@ -55,44 +65,44 @@ class ReceivedPacket:
                 break
 
     def __repr__(self) -> str:
-        return "[BasePacket] Type : {:#02x}, Bytes : {}, Checksum : {}, Corrupt : {}".format(
-            self.packet_type.value, self.received_data, self.received_data[-2:].decode("ascii"),
+        return "[BasePacket] Type : {:#02x}, SubType : {}, Data : {}, Checksum : {}, Corrupt : {}".format(
+            self.packet_type.value, self.packet_subtype.decode("ascii"), self.packet_data_received, self._bytes_received[-2:].decode("ascii"),
             self.corrupt)
 
     def __bytes__(self) -> bytes:
-        return self.received_data
+        return bytes(self._bytes_received)
 
     def command_packet(self) -> CommandPacket:
-        packet = CommandPacket.from_data(self.received_data)
+        packet = CommandPacket.from_data(self.packet_subtype, self.packet_data_received)
         packet.disable_send()
         return packet
 
     def data_packet(self) -> DataPacket:
-        packet = DataPacket.from_data(self.received_data)
+        packet = DataPacket.from_data(self.packet_subtype, self.packet_data_received)
         packet.disable_send()
         return packet
 
     def roleswap_packet(self) -> RoleswapPacket:
-        packet = RoleswapPacket.from_data(self.received_data)
+        packet = RoleswapPacket.from_data(self.packet_subtype, self.packet_data_received)
         packet.disable_send()
         return packet
 
     def check_packet(self) -> CheckPacket:
-        packet = CheckPacket.from_data(self.received_data)
+        packet = CheckPacket.from_data(self.packet_subtype, self.packet_data_received)
         packet.disable_send()
         return packet
 
     def ack_packet(self) -> AckPacket:
-        packet = AckPacket.from_data(self.received_data)
+        packet = AckPacket.from_data(self.packet_subtype, self.packet_data_received)
         packet.disable_send()
         return packet
 
     def error_packet(self) -> ErrorPacket:
-        packet = ErrorPacket.from_data(self.received_data)
+        packet = ErrorPacket.from_data(self.packet_subtype, self.packet_data_received)
         packet.disable_send()
         return packet
 
     def terminate_packet(self) -> TerminatePacket:
-        packet = TerminatePacket.from_data(self.received_data)
+        packet = TerminatePacket.from_data(self.packet_subtype, self.packet_data_received)
         packet.disable_send()
         return packet

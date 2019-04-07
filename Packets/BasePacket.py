@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from abc import ABC
-
+import abc
 from Utils import *
 
 
-class BasePacket(ABC):
+class BasePacket(abc.ABC):
     def __init__(self, packet_type=PacketType.Unknown, packet_subtype=PacketSubType.Unknown, packet_data=bytearray()):
         if not isinstance(packet_type, PacketType):
             raise TypeError
@@ -85,7 +84,7 @@ class BasePacket(ABC):
         self._buffer += to_hexadecimal(checksum)
 
     @classmethod
-    # @abstractmethod
+    @abc.abstractmethod
     def from_data(cls, packet_subtype, packet_data):
         pass
 

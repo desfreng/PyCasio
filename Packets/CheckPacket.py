@@ -27,9 +27,9 @@ class CheckPacket(BasePacket):
         return "CheckPacket [Type : {}] at {}".format(self.packet_subtype.name, hex(id(self)))
 
     @classmethod
-    def make_init_connection(cls):
+    def init(cls):
         return cls(CheckSubType.InitConnection)
 
     @classmethod
-    def make_check_connection(cls):
+    def check(cls):
         return cls(CheckSubType.CheckConnection)
