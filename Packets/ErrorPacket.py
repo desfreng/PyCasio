@@ -5,11 +5,11 @@ from Utils import *
 
 
 class ErrorPacket(BasePacket):
-    def __init__(self, error_type: ErrorSubType = PacketSubType.Unknown):
+    def __init__(self, error_type: ErrorSubType = PacketSubType.Unknown, can_be_send : bool = True):
         if not isinstance(error_type, (ErrorSubType, PacketSubType)):
             raise TypeError
 
-        super().__init__(PacketType.Error, error_type)
+        super().__init__(PacketType.Error, error_type, can_be_sent=can_be_send)
 
     @classmethod
     def from_data(cls, packet_subtype, packet_data):
@@ -18,7 +18,7 @@ class ErrorPacket(BasePacket):
 
         for subtype in ErrorSubType:
             if subtype.value == packet_subtype:
-                return cls(subtype)
+                return cls(subtype, False)
         return None
 
     def __repr__(self):

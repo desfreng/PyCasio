@@ -5,13 +5,13 @@ from Utils import *
 
 
 class AckPacket(BasePacket):
-    def __init__(self, ack_type: AckSubType = AckSubType.Default, ack_data=bytearray()):
+    def __init__(self, ack_type: AckSubType = AckSubType.Default, ack_data=bytearray(), can_be_send : bool = True):
         if not isinstance(ack_type, (AckSubType, PacketSubType)):
             raise TypeError
         if not isinstance(ack_data, (bytearray, bytes)):
             raise TypeError
 
-        super().__init__(PacketType.Ack, ack_type, ack_data)
+        super().__init__(PacketType.Ack, ack_type, ack_data, can_be_send)
 
         if ack_type is AckSubType.ExtendedAck:
             self._hardware = ack_data[0:8].replace(b"\xff", b"").decode("ascii")
@@ -133,13 +133,13 @@ class AckPacket(BasePacket):
             raise TypeError
 
         if packet_subtype == AckSubType.Default.value:
-            return cls(AckSubType.Default)
+            return cls(AckSubType.Default, can_be_send=False)
 
         elif packet_subtype == AckSubType.YesOverwriteReply.value:
-            return cls(AckSubType.YesOverwriteReply)
+            return cls(AckSubType.YesOverwriteReply, can_be_send=False)
 
         elif packet_subtype == AckSubType.ExtendedAck.value:
-            return cls(AckSubType.ExtendedAck, packet_data)
+            return cls(AckSubType.ExtendedAck, packet_data, can_be_send=False)
 
         else:
             return None

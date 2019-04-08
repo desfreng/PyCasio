@@ -73,36 +73,22 @@ class ReceivedPacket:
         return bytes(self._bytes_received)
 
     def command_packet(self) -> CommandPacket:
-        packet = CommandPacket.from_data(self.packet_subtype, self.packet_data_received)
-        packet.disable_send()
-        return packet
+        return CommandPacket.from_data(self.packet_subtype, self.packet_data_received)
 
     def data_packet(self) -> DataPacket:
-        packet = DataPacket.from_data(self.packet_subtype, self.packet_data_received)
-        packet.disable_send()
-        return packet
+        return DataPacket.from_data(self.packet_subtype, self.packet_data_received)
 
     def roleswap_packet(self) -> RoleswapPacket:
-        packet = RoleswapPacket.from_data(self.packet_subtype, self.packet_data_received)
-        packet.disable_send()
-        return packet
+        return RoleswapPacket.from_data(self.packet_subtype, self.packet_data_received)
 
     def check_packet(self) -> CheckPacket:
-        packet = CheckPacket.from_data(self.packet_subtype, self.packet_data_received)
-        packet.disable_send()
-        return packet
+        return CheckPacket.from_data(self.packet_subtype, self.packet_data_received)
 
     def ack_packet(self) -> AckPacket:
-        packet = AckPacket.from_data(self.packet_subtype, self.packet_data_received)
-        packet.disable_send()
-        return packet
+        return AckPacket.from_data(self.packet_subtype, self.packet_data_received)
 
     def error_packet(self) -> ErrorPacket:
-        packet = ErrorPacket.from_data(self.packet_subtype, self.packet_data_received)
-        packet.disable_send()
-        return packet
+        return ErrorPacket.from_data(self.packet_subtype, self.packet_data_received)
 
     def terminate_packet(self) -> TerminatePacket:
-        packet = TerminatePacket.from_data(self.packet_subtype, self.packet_data_received)
-        packet.disable_send()
-        return packet
+        return TerminatePacket.from_data(self.packet_subtype, self.packet_data_received)

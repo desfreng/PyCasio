@@ -5,7 +5,8 @@ from Utils import *
 
 
 class BasePacket(abc.ABC):
-    def __init__(self, packet_type=PacketType.Unknown, packet_subtype=PacketSubType.Unknown, packet_data=bytearray()):
+    def __init__(self, packet_type=PacketType.Unknown, packet_subtype=PacketSubType.Unknown, packet_data=bytearray(),
+                 can_be_sent : bool = True):
         if not isinstance(packet_type, PacketType):
             raise TypeError
         if not isinstance(packet_subtype, SubTypes):
@@ -18,7 +19,7 @@ class BasePacket(abc.ABC):
         self._data = bytearray(packet_data)
         self._buffer = bytearray()
         self._checksum = 0
-        self._can_be_send = True
+        self._can_be_send = can_be_sent
 
     @property
     def extended(self) -> bool:
@@ -42,6 +43,10 @@ class BasePacket(abc.ABC):
         return bytes(self._data)
 
     @property
+    def can_be_sent(self) -> bool:
+        return self._can_be_send
+
+    @property
     def valid(self) -> bool:
         if self.extended:
             return len(self._buffer) == 10 + to_integer(self._buffer[4:8]) and \
@@ -53,12 +58,6 @@ class BasePacket(abc.ABC):
     @property
     def ready(self) -> bool:
         return self._can_be_send and self.valid
-
-    def disable_send(self):
-        self._can_be_send = False
-
-    def enable_send(self):
-        self._can_be_send = True
 
     def compute_checksum(self):
         self._buffer.clear()

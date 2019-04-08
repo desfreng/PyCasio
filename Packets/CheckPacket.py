@@ -5,11 +5,11 @@ from Utils import *
 
 
 class CheckPacket(BasePacket):
-    def __init__(self, check_type: CheckSubType = PacketSubType.Unknown):
+    def __init__(self, check_type: CheckSubType = PacketSubType.Unknown, can_be_send : bool = True):
         if not isinstance(check_type, (CheckSubType, PacketSubType)):
             raise TypeError
 
-        super().__init__(PacketType.Check, check_type)
+        super().__init__(PacketType.Check, check_type, can_be_sent=can_be_send)
 
     @classmethod
     def from_data(cls, packet_subtype, packet_data):
@@ -17,9 +17,9 @@ class CheckPacket(BasePacket):
             raise TypeError
 
         if packet_subtype == CheckSubType.CheckConnection.value:
-            return cls(CheckSubType.CheckConnection)
+            return cls(CheckSubType.CheckConnection, False)
         elif packet_subtype == CheckSubType.InitConnection.value:
-            return cls(CheckSubType.InitConnection)
+            return cls(CheckSubType.InitConnection, False)
         else:
             return None
 

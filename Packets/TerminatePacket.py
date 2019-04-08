@@ -5,11 +5,11 @@ from Utils import *
 
 
 class TerminatePacket(BasePacket):
-    def __init__(self, terminate_type: TerminateSubType = PacketSubType.Unknown):
+    def __init__(self, terminate_type: TerminateSubType = PacketSubType.Unknown, can_be_send : bool = True):
         if not isinstance(terminate_type, (TerminateSubType, PacketSubType)):
             raise TypeError
 
-        super().__init__(PacketType.Terminate, terminate_type)
+        super().__init__(PacketType.Terminate, terminate_type, can_be_sent=can_be_send)
 
 
     @classmethod
@@ -19,7 +19,7 @@ class TerminatePacket(BasePacket):
 
         for subtype in TerminateSubType:
             if subtype.value == packet_subtype:
-                return cls(subtype)
+                return cls(subtype, False)
         return None
 
     def __repr__(self):

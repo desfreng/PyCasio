@@ -4,7 +4,6 @@ from datetime import datetime
 
 import usb1
 
-from Packets.CheckPacket import *
 from Packets.ErrorPacket import *
 from Packets.ReceivedPacket import *
 
