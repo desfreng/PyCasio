@@ -7,8 +7,8 @@ Created on Sat Mar 16 17:29:14 2019
 """
 import usb1
 
-from Packets.BasePacket import BasePacket
-
+from ReceivedPacket import ReceivedPacket
+from Utils import BasePacket
 
 class PacketManager:
     def __init__(self, id_vendor=0x07cf, id_product=0x6101):
@@ -20,32 +20,35 @@ class PacketManager:
             raise ConnectionError("Unable to find Calculator")
 
     def __del__(self):
-        self._handle.close()
+        if self._handle is not None:
+            self._handle.close()
         self._context.close()
 
     def __lshift__(self, other):
-        if isinstance(other, BasePacket):
+        if not isinstance(other, BasePacket):
             raise TypeError("Casio Packet Expected as argument")
 
         self.send_packet(other)
 
     def __rshift__(self, other):
-        if isinstance(other, BasePacket):
-            raise TypeError("Casio Packet Expected as argument")
+        if not isinstance(other, ReceivedPacket):
+            raise TypeError("ReceivedPacket expected as argument")
 
-        other = self.receive_packet()
+        other.import_bytes(self._get_bytes())
 
     def receive_packet(self) -> BasePacket:
-        pass
-
-    #     outputPacket = BasePacket()
-    #     outputPacket.fromByteArray(self._handle.bulkRead(0x82, 4096))
-    #     return outputPacket
-    #
+        return ReceivedPacket.from_bytes(self._get_bytes())
 
     def send_packet(self, packet: BasePacket):
-        pass
-    #     if isinstance(packet, BasePacket):
-    #         raise TypeError("Casio Packet Expected as argument")
-    #
-    #     self._handle.bulkWrite(0x01, packet.toByteArray())
+        if not isinstance(packet, BasePacket):
+            raise TypeError("BasePacket instance expected as argument")
+
+        self._handle.bulkWrite(0x01, bytes(packet))
+
+    def _get_bytes(self) -> bytes:
+        buffer = bytearray()
+
+        while len(buffer) == 0:
+            buffer = self._handle.bulkRead(0x82, 4096)
+
+        return buffer
