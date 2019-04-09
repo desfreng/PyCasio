@@ -224,7 +224,87 @@ class CommandPacket(BasePacket):
 
 
 class DataPacket(BasePacket):
-    pass
+    def __init__(self, data_type: DataSubType = PacketSubType.Unknown, packet_data: bytes = bytes(), can_be_send: bool = True):
+        if not isinstance(data_type, (DataSubType, PacketSubType)):
+            raise TypeError
+        if not isinstance(packet_data, (bytes, bytearray)):
+            raise TypeError
+
+        super().__init__(PacketType.Error, data_type, can_be_sent=can_be_send)
+
+        if len(packet_data) > 8:
+            self._total_packet_number = to_integer(packet_data[0:4])
+            self._packet_number = to_integer(packet_data[4:8])
+            self._packet_data = packet_data[8:]
+        else:
+            self._total_packet_number = 0
+            self._packet_number = 0
+            self._packet_data = bytearray()
+
+    @classmethod
+    def from_data(cls, packet_subtype, packet_data):
+        if not isinstance(packet_subtype, (bytes, bytearray)):
+            raise TypeError
+
+        for subtype in DataSubType:
+            if subtype.value == packet_subtype:
+                return cls(subtype, packet_data, False)
+        return None
+
+    @property
+    def total_packet_number(self) -> int:
+        return self._total_packet_number
+
+    @total_packet_number.setter
+    def total_packet_number(self, value):
+        if value > 65535 or value < 1:
+            raise ValueError
+
+        self._total_packet_number = value
+
+    @property
+    def packet_number(self) -> int:
+        return self._packet_number
+
+    @packet_number.setter
+    def packet_number(self, value):
+        if value > 65535 or value < 1:
+            raise ValueError
+
+        self._packet_number = value
+
+    @property
+    def packet_data(self) -> bytes:
+        return bytes(self._packet_data)
+
+    @packet_data.setter
+    def packet_data(self, data):
+        if not isinstance(data, (bytearray, bytes)):
+            raise TypeError
+
+        if len(data) > 512:
+            raise ValueError
+
+        self._packet_data = data
+
+    def __repr__(self):
+        return "DataPacket [Type : {}] at {}\n" \
+               "--------------- Data : ---------------\n"\
+               "Total Packet Number :       {}\n" \
+               "Packet Number :             {}\n" \
+               "Data :                      {}\n" \
+               "--------------------------------------"\
+            .format(self.packet_subtype.name, hex(id(self)), self.total_packet_number, self.packet_number,
+                    self.packet_data)
+
+    def compute_checksum(self):
+        self._data.clear()
+
+        self._data += to_hexadecimal(self.total_packet_number, 4)
+        self._data += to_hexadecimal(self.packet_number, 4)
+        self._data += self.packet_data
+
+        super().compute_checksum()
 
 
 class RoleswapPacket(BasePacket):
