@@ -13,7 +13,7 @@ class OverwriteMode(Enum):
 class CommandPacket(BasePacket):
     def __init__(self, command_type: CommandSubType = PacketSubType.Unknown, command_data: bytes = bytes(),
                  can_be_send: bool = True):
-        if not isinstance(command_type, (ErrorSubType, PacketSubType)):
+        if not isinstance(command_type, (CommandSubType, PacketSubType)):
             raise TypeError
         if not isinstance(command_data, (bytes, bytearray)):
             raise TypeError
@@ -21,6 +21,7 @@ class CommandPacket(BasePacket):
         super().__init__(PacketType.Command, command_type, command_data, can_be_sent=can_be_send)
 
         self._overwrite = OverwriteMode.Default
+        self._data_type = b"00"
         self._file_size = 0
         self._data1 = bytearray()
         self._data2 = bytearray()
@@ -34,26 +35,28 @@ class CommandPacket(BasePacket):
                 if a.value == command_data[0:2]:
                     self._overwrite = a
 
-            self._file_size = to_integer(command_data[4:13])
+            self._file_size = to_integer(command_data[4:12])
 
-            relative_offset = 25
+            self._data_type = command_data[2:4]
 
-            self._data1 = command_data[relative_offset:relative_offset + to_integer(command_data[13:15])]
-            relative_offset += to_integer(command_data[13:15])
+            relative_offset = 24
 
-            self._data2 = command_data[relative_offset:relative_offset + to_integer(command_data[15:17])]
-            relative_offset += to_integer(command_data[15:17])
+            self._data1 = command_data[relative_offset:relative_offset + to_integer(command_data[12:14])]
+            relative_offset += to_integer(command_data[12:14])
 
-            self._data3 = command_data[relative_offset:relative_offset + to_integer(command_data[17:19])]
-            relative_offset += to_integer(command_data[17:19])
+            self._data2 = command_data[relative_offset:relative_offset + to_integer(command_data[14:16])]
+            relative_offset += to_integer(command_data[14:16])
 
-            self._data4 = command_data[relative_offset:relative_offset + to_integer(command_data[19:21])]
-            relative_offset += to_integer(command_data[19:21])
+            self._data3 = command_data[relative_offset:relative_offset + to_integer(command_data[16:18])]
+            relative_offset += to_integer(command_data[16:18])
 
-            self._data5 = command_data[relative_offset:relative_offset + to_integer(command_data[21:23])]
-            relative_offset += to_integer(command_data[21:23])
+            self._data4 = command_data[relative_offset:relative_offset + to_integer(command_data[18:20])]
+            relative_offset += to_integer(command_data[18:20])
 
-            self._data6 = command_data[relative_offset:relative_offset + to_integer(command_data[23:25])]
+            self._data5 = command_data[relative_offset:relative_offset + to_integer(command_data[20:22])]
+            relative_offset += to_integer(command_data[20:22])
+
+            self._data6 = command_data[relative_offset:relative_offset + to_integer(command_data[22:24])]
 
     @classmethod
     def from_data(cls, packet_subtype, packet_data):
@@ -72,6 +75,7 @@ class CommandPacket(BasePacket):
                "--------------- Data : ---------------\n"\
                "SubType :           {}\n" \
                "Overwrite Mode :    {}\n" \
+               "Data Type :         {}\n" \
                "File Size :         {}\n" \
                "Data 1 :            {}\n" \
                "Data 2 :            {}\n" \
@@ -80,7 +84,7 @@ class CommandPacket(BasePacket):
                "Data 5 :            {}\n" \
                "Data 6 :            {}\n" \
                "--------------------------------------"\
-            .format(hex(id(self)), self.packet_subtype.name, self.overwrite.name, self.file_size,
+            .format(hex(id(self)), self.packet_subtype.name, self.overwrite.name, self.data_type, self.file_size,
                     self.data1, self.data2, self.data3, self.data4, self.data5, self.data6)
 
     @property
@@ -99,17 +103,30 @@ class CommandPacket(BasePacket):
         return self._overwrite
 
     @overwrite.setter
-    def overwrite(self, mode:OverwriteMode):
+    def overwrite(self, mode: OverwriteMode):
         if not isinstance(mode, OverwriteMode):
             raise TypeError
         self._overwrite = mode
+
+    @property
+    def data_type(self) -> bytes:
+        return bytes(self._data_type)
+
+    @data_type.setter
+    def data_type(self, data_typee: bytes):
+        if not isinstance(data_typee, (bytearray, bytes)):
+            raise TypeError
+        if len(data_typee) < 2:
+            raise ValueError
+
+        self._data_type = data_typee[0:2]
 
     @property
     def file_size(self) -> int:
         return self._file_size
 
     @file_size.setter
-    def file_size(self, size):
+    def file_size(self, size: int):
         if size > to_integer(b"FFFFFFFF"):
             raise ValueError("File size to big !")
 
@@ -203,7 +220,7 @@ class CommandPacket(BasePacket):
             super().compute_checksum()
         else:
             self._data += self.overwrite.value
-            self._data += b"00"
+            self._data += self.data_type
             self._data += to_hexadecimal(self.file_size, 8)
 
             self._data += to_hexadecimal(len(self.data1), 2)
@@ -308,8 +325,8 @@ class DataPacket(BasePacket):
 
 
 class RoleswapPacket(BasePacket):
-    def __init__(self, can_be_send : bool = True):
-        super().__init__(PacketType.Roleswap, RoleswapSubType.Default, can_be_send=can_be_send)
+    def __init__(self, can_be_send: bool = True):
+        super().__init__(PacketType.Roleswap, RoleswapSubType.Default, can_be_sent=can_be_send)
 
     @classmethod
     def from_data(cls, packet_subtype, packet_data):

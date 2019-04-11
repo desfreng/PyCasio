@@ -25,9 +25,6 @@ class PacketManager:
         self._context.close()
 
     def __lshift__(self, other):
-        if not isinstance(other, BasePacket):
-            raise TypeError("Casio Packet Expected as argument")
-
         self.send_packet(other)
 
     def __rshift__(self, other):
@@ -40,10 +37,13 @@ class PacketManager:
         return ReceivedPacket.from_bytes(self._get_bytes())
 
     def send_packet(self, packet: BasePacket):
-        if not isinstance(packet, BasePacket):
+        if not isinstance(packet, (BasePacket, bytes, bytearray)):
             raise TypeError("BasePacket instance expected as argument")
 
-        self._handle.bulkWrite(0x01, bytes(packet))
+        if isinstance(packet, (bytearray, bytes)):
+            self._handle.bulkWrite(0x01, packet)
+        else:
+            self._handle.bulkWrite(0x01, bytes(packet))
 
     def _get_bytes(self) -> bytes:
         buffer = bytearray()

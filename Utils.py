@@ -63,31 +63,57 @@ class CommandSubType(SubTypes, Enum):
     GetInfo = b"01"  # Value : 1
     SetLinkSettings = b"02"  # Value : 2
 
+    # MCS Storage              # [32 - 51]
+    MCSCreateDirectory = b"20"  # Value : 32
+    MCSDeleteDirectory = b"21"  # Value : 33
+    MCSRenameDirectory = b"22"  # Value : 34
+    MCSChangeWorkingDirectory = b"23"  # Value : 35
+
+    MCSFileTransferRequest = b"24"  # Value : 36
+    MCSFileTransferAllRequest = b"29"  # Value : 41
+    MCSFileTransfer = b"25"  # Value : 37
+
+    MCSDeleteFile = b"26"  # Value : 38
+    MCSRenameFile = b"27"  # Value : 39
+    MCSCopyFile = b"28"  # Value : 40
+
+    MCSCapacityTransmitRequest = b"2B"  # Value : 43
+    MCSCapacityTransmit = b"2C"  # Value : 44
+
+    MCSFileInfoTransferAllRequest = b"2D"  # Value : 45
+    MCSFileInfoTransfer = b"2E"  # Value : 46
+
+    MCSImageTransferRequest = b"2F"  # Value : 47
+    MCSImageTransfer = b"30"  # Value : 48
+
+    MCSSetupEntryTransferRequest = b"31"  # Value : 49
+    MCSSetupEntryTransfer = b"32"  # Value : 50
+    MCSSetupEntryTransferAllRequest = b"33"  # Value : 51
+
     # FlashStorage Types       # [64 - 81]
-    CreateDirectory = b"40"  # Value : 64
-    DeleteDirectory = b"41"  # Value : 65
-    RenameDirectory = b"42"  # Value : 66
-    ChangeWorkingDirectory = b"43"  # Value : 67
+    FlashCreateDirectory = b"40"  # Value : 64
+    FlashDeleteDirectory = b"41"  # Value : 65
+    FlashRenameDirectory = b"42"  # Value : 66
+    FlashChangeWorkingDirectory = b"43"  # Value : 67
 
-    FileTransferRequest = b"44"  # Value : 68
-    FileTransfer = b"45"  # Value : 69
-    FileTransferAllRequest = b"49"  # Value : 73
+    FlashFileTransferRequest = b"44"  # Value : 68
+    FlashFileTransfer = b"45"  # Value : 69
+    FlashFileTransferAllRequest = b"49"  # Value : 73
 
-    DeleteFile = b"46"  # Value : 70
-    RenameFile = b"47"  # Value : 71
-    CopyFile = b"48"  # Value : 72
+    FlashDeleteFile = b"46"  # Value : 70
+    FlashRenameFile = b"47"  # Value : 71
+    FlashCopyFile = b"48"  # Value : 72
 
-    CapacityTransmitRequest = b"4B"  # Value : 75
-    CapacityTransmit = b"4C"  # Value : 76
+    FlashCapacityTransmitRequest = b"4B"  # Value : 75
+    FlashCapacityTransmit = b"4C"  # Value : 76
 
-    FileInfoTransfer = b"4E"  # Value : 78
-    FileInfoTransferAllRequest = b"4D"  # Value : 77
+    FlashFileInfoTransfer = b"4E"  # Value : 78
+    FlashFileInfoTransferAllRequest = b"4D"  # Value : 77
 
-    ImageTransferRequest = b"4F"  # Value : 79
-    ImageTransfer = b"50"  # Value : 80
+    FlashImageTransferRequest = b"4F"  # Value : 79
+    FlashImageTransfer = b"50"  # Value : 80
 
     OptimizeFileSystem = b"51"  # Value : 81
-
 
 DataSubType = CommandSubType
 
