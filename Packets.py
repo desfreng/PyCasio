@@ -265,7 +265,7 @@ class DataPacket(BasePacket):
 
         for subtype in DataSubType:
             if subtype.value == packet_subtype:
-                return cls(subtype, packet_data, False)
+                return cls(subtype, DataPacket.decode_data(packet_data), False)
         return None
 
     @property
@@ -314,12 +314,52 @@ class DataPacket(BasePacket):
             .format(self.packet_subtype.name, hex(id(self)), self.total_packet_number, self.packet_number,
                     self.packet_data)
 
+    @staticmethod
+    def encode_data(data: bytes) -> bytes:
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError
+
+        return_data = bytearray()
+
+        for byte in data:
+            if byte in range(0x00, 0x20):
+                return_data.append(0x5C)
+                return_data.append((byte + 0x20) % 256)
+            else:
+                return_data.append(byte)
+
+        return return_data
+
+    @staticmethod
+    def decode_data(data: bytes) -> bytes:
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError
+
+        return_data = bytearray()
+        skip_next_byte = False
+
+        for byte in data:
+            if byte is 0x5C:
+                if skip_next_byte:
+                    return_data.append(0x5C)
+                else:
+                    skip_next_byte = True
+                    continue
+
+            if skip_next_byte:
+                return_data.append((byte - 0x20) % 256)
+                skip_next_byte = False
+            else:
+                return_data.append(byte)
+
+        return return_data
+
     def compute_checksum(self):
         self._data.clear()
 
         self._data += to_hexadecimal(self.total_packet_number, 4)
         self._data += to_hexadecimal(self.packet_number, 4)
-        self._data += self.packet_data
+        self._data += DataPacket.encode_data(self.packet_data)
 
         super().compute_checksum()
 
