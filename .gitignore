@@ -108,3 +108,6 @@ venv.bak/
 
 #PyCharms Files
 .idea
+
+# Test Files
+Test.py
