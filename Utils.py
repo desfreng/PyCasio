@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from enum import Enum
+from enum import Enum, auto
 from abc import ABC, abstractmethod
+
+
+class Devices(Enum):
+    MCS = auto()
+    FlashStorage = b"fls0"
+    SDCard = b"crd0"
+
 
 _HEXADECIMAL_ARRAY = bytes("0123456789ABCDEF", "ascii")
 
@@ -115,6 +122,7 @@ class CommandSubType(SubTypes, Enum):
 
     OptimizeFileSystem = b"51"  # Value : 81
 
+
 DataSubType = CommandSubType
 
 
@@ -156,7 +164,7 @@ class TerminateSubType(SubTypes, Enum):
 
 class BasePacket(ABC):
     def __init__(self, packet_type=PacketType.Unknown, packet_subtype=PacketSubType.Unknown, packet_data=bytearray(),
-                 can_be_sent : bool = True):
+                 can_be_sent: bool = True):
         if not isinstance(packet_type, PacketType):
             raise TypeError
         if not isinstance(packet_subtype, SubTypes):
