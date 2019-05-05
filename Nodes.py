@@ -3,21 +3,85 @@
 from Utils import Devices
 
 
-class DirectoryNode:
-    def __init__(self, dir_name: str):
-        self.name = dir_name
+class AbstractNode():
+    def __init__(self, name, directory=None):
+        self._dir = None
+        self._name = None
+
+        self.name = name
+        self.parent = directory
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        if self._dir is None:
+            self._name = name
+        elif name not in self.parent:
+            self._name = name
+
+    @property
+    def parent(self):
+        return self._dir
+
+    @parent.setter
+    def parent(self, directory):
+        if directory is None:
+            self._dir = None
+        elif self not in directory:
+            directory.add(self)
+
+
+class DirectoryNode(AbstractNode):
+    def __init__(self, dir_name, parent=None):
+        super().__init__(dir_name, parent)
+
         self._child = []
+        self._ro = False
 
     def __iter__(self):
         return iter(self._child)
 
     @property
+    def read_only(self):
+        return self._ro
+
+    def _set_ro(self, value):
+        self._ro = value
+
+        for a in self:
+            if isinstance(a, DirectoryNode):
+                a._ro = value
+
+    @property
     def files(self):
-        return tuple(self._child)
+        value_return = []
+
+        for a in self:
+            if isinstance(a, FileNode):
+                value_return.append(a)
+
+        return tuple(value_return)
 
     @property
     def file_number(self):
         return len(self.files)
+
+    @property
+    def directories(self):
+        value_return = []
+
+        for a in self:
+            if isinstance(a, DirectoryNode):
+                value_return.append(a)
+
+        return tuple(value_return)
+
+    @property
+    def directories_number(self):
+        return len(self.directories)
 
     def __repr__(self):
         return "DirectoryNode : {}".format(self.name)
@@ -41,27 +105,33 @@ class DirectoryNode:
         return file in self
 
     def find_by_name(self, name):
-        if not isinstance(name, str):
-            raise TypeError
-
         for a in self:
             if a.name == name:
                 return a
         return None
 
     def add(self, file):
-        if not isinstance(file, FileNode):
+        if self._ro:
+            raise Exception("Directory in Read Only mode !")
+
+        if not isinstance(file, AbstractNode):
             raise TypeError
+
+        if isinstance(file, DirectoryNode) and self.parent is not None:
+            raise Exception("This Directory is not Root directory. Can add directory to child")
 
         if file not in self:
             self._child.append(file)
             file._dir = self
 
     def remove(self, file):
+        if self._ro:
+            raise Exception("Directory in Read Only mode !")
+
         if file in self:
             if isinstance(file, str):
                 remove = self.find_by_name(file)
-            elif isinstance(file, FileNode):
+            elif isinstance(file, AbstractNode):
                 remove = file
             else:
                 raise TypeError
@@ -80,10 +150,7 @@ class DirectoryNode:
         return self
 
     def __getattr__(self, item):
-        if item is self:
-            return self.find_by_name(item)
-        else:
-            raise AttributeError
+        return self.find_by_name(item)
 
     def __delattr__(self, item):
         self.remove(item)
@@ -98,16 +165,12 @@ class DirectoryNode:
         self.remove(key)
 
 
-class FileNode:
+class FileNode(AbstractNode):
     def __init__(self, device, filename, directory=None, filesize=0, data_type=b"00", group_name=""):
-        self._dir = None
-        self.parent = directory
+        super().__init__(filename, directory)
 
         self._device = None
         self.device = device
-
-        self._name = None
-        self.name = filename
 
         self._data_type = None
         self._group_name = None
@@ -119,17 +182,6 @@ class FileNode:
         self.size = filesize
 
     @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name):
-        if self._dir is None:
-            self._name = name
-        elif name not in self.parent:
-            self._name = name
-
-    @property
     def data_type(self):
         if self.device == Devices.MCS:
             return self._data_type
@@ -139,13 +191,10 @@ class FileNode:
     @data_type.setter
     def data_type(self, data):
         if self.device == Devices.MCS:
-            if isinstance(data, (bytes, bytearray)):
-                if len(data) < 2:
-                    raise ValueError
-                else:
-                    self._data_type = data[0:2]
+            if len(data) < 2:
+                raise ValueError
             else:
-                raise TypeError
+                self._data_type = data[0:2]
         else:
             raise Exception("MCS Files don't have data_type field")
 
@@ -155,28 +204,14 @@ class FileNode:
 
     @device.setter
     def device(self, device):
-        if isinstance(device, Devices):
-            self._device = device
-        else:
-            raise TypeError
-
-    @property
-    def parent(self):
-        return self._dir
-
-    @parent.setter
-    def parent(self, directory):
-        if directory is None:
-            self._dir = None
-        elif self not in directory:
-            directory.add(self)
+        self._device = device
 
     def __repr__(self):
         if self.device == Devices.MCS:
-            return "[Device : MCSStorage] File : {} (Data Type : {}), Size : {}, Parent : {}"\
+            return "[Device : MCSStorage] File : {} (Data Type : {}), Size : {}, Parent : {}" \
                 .format(self.name, self.data_type, self.size, self.parent.name)
         else:
-            return "[Device : {}] File : {}, Size : {}, Parent : {}"\
+            return "[Device : {}] File : {}, Size : {}, Parent : {}" \
                 .format(self.device.name, self.name, self.size, self.parent.name)
 
     @property
