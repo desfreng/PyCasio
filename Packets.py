@@ -239,6 +239,25 @@ class CommandPacket(BasePacket):
 
             super().compute_checksum()
 
+    def __eq__(self, other):
+        if isinstance(other, CommandPacket):
+            return self.packet_type == other.packet_type and \
+                   self.packet_subtype == other.packet_subtype and \
+                   self.data1 == other.data1 and \
+                   self.data2 == other.data2 and \
+                   self.data3 == other.data3 and \
+                   self.data4 == other.data4 and \
+                   self.data5 == other.data5 and \
+                   self.data6 == other.data6 and \
+                   self.data_type == other.data_type and \
+                   self.overwrite == other.overwrite and \
+                   self.file_size == other.file_size
+        else:
+            raise NotImplemented
+
+    def __ne__(self, other):
+        return not self == other
+
 
 class DataPacket(BasePacket):
     def __init__(self, data_type: DataSubType = PacketSubType.Unknown, packet_data: bytes = bytes(), can_be_send: bool = True):
@@ -363,6 +382,19 @@ class DataPacket(BasePacket):
 
         super().compute_checksum()
 
+    def __eq__(self, other):
+        if isinstance(other, DataPacket):
+            return self.packet_type == other.packet_type and \
+                self.packet_subtype == other.packet_subtype and \
+                self.packet_number == other.packet_number and \
+                self.packet_data == other.packet_data and \
+                self.total_packet_number == other.total_packet_number
+        else:
+            raise NotImplemented
+
+    def __ne__(self, other):
+        return not self == other
+
 
 class RoleswapPacket(BasePacket):
     def __init__(self, can_be_send: bool = True):
@@ -374,6 +406,12 @@ class RoleswapPacket(BasePacket):
 
     def __repr__(self):
         return "RoleswapPacket at {}".format(hex(id(self)))
+
+    def __eq__(self, other):
+        return isinstance(other, RoleswapPacket)
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class CheckPacket(BasePacket):
@@ -406,6 +444,16 @@ class CheckPacket(BasePacket):
     def check(cls):
         return cls(CheckSubType.CheckConnection)
 
+    def __eq__(self, other):
+        if isinstance(other, CheckPacket):
+            return self.packet_type == other.packet_type and \
+                   self.packet_subtype == other.packet_subtype
+        else:
+            raise NotImplemented
+
+    def __ne__(self, other):
+        return not self == other
+
 
 class AckPacket(BasePacket):
     def __init__(self, ack_type: AckSubType = AckSubType.Default, ack_data=bytearray(), can_be_send : bool = True):
@@ -437,95 +485,87 @@ class AckPacket(BasePacket):
             self._protocol_version = ack_data[128:132].replace(b"\xff", b"").decode("ascii")
             self._product_id = ack_data[132:148].replace(b"\xff", b"").decode("ascii")
             self._user_name = ack_data[148:164].replace(b"\xff", b"").decode("ascii", "ignore")
+        else:
+            self._hardware = None
+            self._processor = None
+
+            self._rom_capacity = None
+            self._flash_rom_capacity = None
+            self._ram_capacity = None
+
+            self._rom_version = None
+
+            self._boot_code_version = None
+            self._boot_code_offset = None
+            self._boot_code_size = None
+
+            self._os_code_version = None
+            self._os_code_offset = None
+            self._os_code_size = None
+
+            self._protocol_version = None
+            self._product_id = None
+            self._user_name = None
+
 
     @property
     def hardware(self) -> str:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._hardware
 
     @property
     def processor(self) -> str:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._processor
 
     @property
     def rom_capacity(self) -> int:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._rom_capacity
 
     @property
     def flash_rom_capacity(self) -> int:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._flash_rom_capacity
 
     @property
     def ram_capacity(self) -> int:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._ram_capacity
 
     @property
     def rom_version(self) -> str:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._rom_version
 
     @property
     def boot_code_version(self) -> str:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._boot_code_version
 
     @property
     def boot_code_offset(self) -> int:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._boot_code_offset
 
     @property
     def boot_code_size(self) -> int:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._boot_code_size
 
     @property
     def os_code_version(self) -> str:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._os_code_version
 
     @property
     def os_code_offset(self) -> int:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._os_code_offset
 
     @property
     def os_code_size(self) -> int:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._os_code_size
 
     @property
     def protocol_version(self) -> str:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._protocol_version
 
     @property
     def product_id(self) -> str:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._product_id
 
     @property
     def user_name(self) -> str:
-        if self.packet_subtype is not AckSubType.ExtendedAck:
-            return
         return self._user_name
 
     @classmethod
@@ -536,7 +576,7 @@ class AckPacket(BasePacket):
             raise TypeError
 
         if packet_subtype == AckSubType.Default.value:
-            return cls(AckSubType.Default, can_be_send=False)
+            return cls(can_be_send=False)
 
         elif packet_subtype == AckSubType.YesOverwriteReply.value:
             return cls(AckSubType.YesOverwriteReply, can_be_send=False)
@@ -568,7 +608,7 @@ class AckPacket(BasePacket):
                    "User Name :          {}\n" \
                    "--------------------------------------"\
                 .format(hex(id(self)), self.hardware, self.processor, self.rom_capacity,self.flash_rom_capacity,
-                        self.ram_capacity, self.rom_capacity, self.boot_code_version, self.boot_code_offset,
+                        self.ram_capacity, self.rom_version, self.boot_code_version, self.boot_code_offset,
                         self.boot_code_size, self.os_code_version, self.os_code_offset, self.os_code_size,
                         self.protocol_version, self.product_id, self.user_name)
         else:
@@ -580,7 +620,36 @@ class AckPacket(BasePacket):
 
     @classmethod
     def default(cls):
-        return cls(AckSubType.Default)
+        return cls()
+
+    def __eq__(self, other):
+        if isinstance(other, AckPacket):
+            if self.packet_subtype == AckSubType.ExtendedAck or other.packet_subtype == AckSubType.ExtendedAck:
+                return self.hardware == other.hardware and \
+                   self.processor == other.processor and \
+                   self.rom_capacity == other.rom_capacity and \
+                   self.flash_rom_capacity == other.flash_rom_capacity and \
+                   self.ram_capacity == other.ram_capacity and \
+                   self.rom_version == other.rom_version and \
+                   self.boot_code_version == other.boot_code_version and \
+                   self.boot_code_offset == other.boot_code_offset and \
+                   self.boot_code_size == other.boot_code_size and \
+                   self.os_code_version == other.os_code_version and \
+                   self.os_code_offset == other.os_code_offset and \
+                   self.os_code_size == other.os_code_size and \
+                   self.protocol_version == other.protocol_version and \
+                   self.product_id == other.product_id and \
+                   self.user_name == other.user_name and \
+                   self.packet_subtype == other.packet_subtype and \
+                   self.packet_type == other.packet_type
+            else:
+                return self.packet_type == other.packet_type and \
+                   self.packet_subtype == other.packet_subtype
+        else:
+            raise NotImplemented
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class ErrorPacket(BasePacket):
@@ -627,6 +696,16 @@ class ErrorPacket(BasePacket):
     def memory_full(cls):
         return cls(ErrorSubType.MemoryFull)
 
+    def __eq__(self, other):
+        if isinstance(other, ErrorPacket):
+            return self.packet_type == other.packet_type and \
+                   self.packet_subtype == other.packet_subtype
+        else:
+            raise NotImplemented
+
+    def __ne__(self, other):
+        return not self == other
+
 
 class TerminatePacket(BasePacket):
     def __init__(self, terminate_type: TerminateSubType = PacketSubType.Unknown, can_be_send : bool = True):
@@ -664,3 +743,13 @@ class TerminatePacket(BasePacket):
     @classmethod
     def on_overwrite(cls):
         return cls(TerminateSubType.Overwrite)
+
+    def __eq__(self, other):
+        if isinstance(other, TerminatePacket):
+            return self.packet_type == other.packet_type and \
+                   self.packet_subtype == other.packet_subtype
+        else:
+            raise NotImplemented
+
+    def __ne__(self, other):
+        return not self == other

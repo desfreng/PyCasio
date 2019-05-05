@@ -138,3 +138,24 @@ class ReceivedPacket:
 
     def terminate_packet(self) -> TerminatePacket:
         return TerminatePacket.from_data(self.packet_subtype, self.packet_data_received)
+
+    def __eq__(self, other):
+        if isinstance(other, ReceivedPacket):
+            return self == other
+        elif isinstance(other, CheckPacket):
+            return self.check_packet() == other
+        elif isinstance(other, CommandPacket):
+            return self.command_packet() == other
+        elif isinstance(other, AckPacket):
+            return self.ack_packet() == other
+        elif isinstance(other, TerminatePacket):
+            return self.terminate_packet() == other
+        elif isinstance(other, RoleswapPacket):
+            return self.roleswap_packet() == other
+        elif isinstance(other, ErrorPacket):
+            return self.error_packet() == other
+        elif isinstance(other, DataPacket):
+            return self.data_packet() == other
+
+    def __ne__(self, other):
+        return not self == other
