@@ -4,6 +4,10 @@ from enum import Enum, auto
 from abc import ABC, abstractmethod
 
 
+class CasioException(Exception):
+    pass
+
+
 class Devices(Enum):
     MCS = auto()
     FlashStorage = b"fls0"
@@ -257,3 +261,16 @@ class BasePacket(ABC):
     def __bytes__(self):
         self.compute_checksum()
         return bytes(self._buffer)
+
+    def __eq__(self, other):
+        if isinstance(other, BasePacket):
+            return self.packet_type == other.packet_type and self.packet_subtype == other.packet_subtype
+        elif isinstance(other, PacketType):
+            return self.packet_type == other
+        elif isinstance(other, SubTypes):
+            return self.packet_subtype == other
+        else:
+            raise NotImplemented
+
+    def __ne__(self, other):
+        return not self == other

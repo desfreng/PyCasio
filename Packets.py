@@ -253,10 +253,7 @@ class CommandPacket(BasePacket):
                    self.overwrite == other.overwrite and \
                    self.file_size == other.file_size
         else:
-            raise NotImplemented
-
-    def __ne__(self, other):
-        return not self == other
+            return BasePacket.__eq__(self, other)
 
 
 class DataPacket(BasePacket):
@@ -390,10 +387,7 @@ class DataPacket(BasePacket):
                 self.packet_data == other.packet_data and \
                 self.total_packet_number == other.total_packet_number
         else:
-            raise NotImplemented
-
-    def __ne__(self, other):
-        return not self == other
+            return BasePacket.__eq__(self, other)
 
 
 class RoleswapPacket(BasePacket):
@@ -406,12 +400,6 @@ class RoleswapPacket(BasePacket):
 
     def __repr__(self):
         return "RoleswapPacket at {}".format(hex(id(self)))
-
-    def __eq__(self, other):
-        return isinstance(other, RoleswapPacket)
-
-    def __ne__(self, other):
-        return not self == other
 
 
 class CheckPacket(BasePacket):
@@ -443,16 +431,6 @@ class CheckPacket(BasePacket):
     @classmethod
     def check(cls):
         return cls(CheckSubType.CheckConnection)
-
-    def __eq__(self, other):
-        if isinstance(other, CheckPacket):
-            return self.packet_type == other.packet_type and \
-                   self.packet_subtype == other.packet_subtype
-        else:
-            raise NotImplemented
-
-    def __ne__(self, other):
-        return not self == other
 
 
 class AckPacket(BasePacket):
@@ -643,13 +621,9 @@ class AckPacket(BasePacket):
                    self.packet_subtype == other.packet_subtype and \
                    self.packet_type == other.packet_type
             else:
-                return self.packet_type == other.packet_type and \
-                   self.packet_subtype == other.packet_subtype
+                return BasePacket.__eq__(self, other)
         else:
-            raise NotImplemented
-
-    def __ne__(self, other):
-        return not self == other
+            return BasePacket.__eq__(self, other)
 
 
 class ErrorPacket(BasePacket):
@@ -696,16 +670,6 @@ class ErrorPacket(BasePacket):
     def memory_full(cls):
         return cls(ErrorSubType.MemoryFull)
 
-    def __eq__(self, other):
-        if isinstance(other, ErrorPacket):
-            return self.packet_type == other.packet_type and \
-                   self.packet_subtype == other.packet_subtype
-        else:
-            raise NotImplemented
-
-    def __ne__(self, other):
-        return not self == other
-
 
 class TerminatePacket(BasePacket):
     def __init__(self, terminate_type: TerminateSubType = PacketSubType.Unknown, can_be_send : bool = True):
@@ -743,13 +707,3 @@ class TerminatePacket(BasePacket):
     @classmethod
     def on_overwrite(cls):
         return cls(TerminateSubType.Overwrite)
-
-    def __eq__(self, other):
-        if isinstance(other, TerminatePacket):
-            return self.packet_type == other.packet_type and \
-                   self.packet_subtype == other.packet_subtype
-        else:
-            raise NotImplemented
-
-    def __ne__(self, other):
-        return not self == other

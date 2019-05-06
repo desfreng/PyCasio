@@ -141,7 +141,9 @@ class ReceivedPacket:
 
     def __eq__(self, other):
         if isinstance(other, ReceivedPacket):
-            return self == other
+            return self.packet_type == other.packet_type and \
+                self.packet_subtype == other.packet_subtype and \
+                self.packet_data_received == other.packet_data_received
         elif isinstance(other, CheckPacket):
             return self.check_packet() == other
         elif isinstance(other, CommandPacket):
@@ -156,6 +158,8 @@ class ReceivedPacket:
             return self.error_packet() == other
         elif isinstance(other, DataPacket):
             return self.data_packet() == other
+        elif isinstance(other, PacketType):
+            return self.packet_type == other
 
     def __ne__(self, other):
         return not self == other
