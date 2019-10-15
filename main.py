@@ -14,3 +14,5 @@ manager << CheckPacket.init()
 while True:
     manager >> packet
     print("[{}] Received : {}".format(datetime.now().strftime("%H:%M:%S.%f"), packet))
+
+print("Ok")
